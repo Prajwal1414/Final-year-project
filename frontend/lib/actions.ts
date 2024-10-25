@@ -13,6 +13,7 @@ export async function createVirtualbox(body: {
   name: string;
   visibility: string;
 }) {
+  console.log(body);
   const res = await fetch(
     "https://database.pkunofficial66.workers.dev/api/virtualbox",
     {
@@ -23,6 +24,7 @@ export async function createVirtualbox(body: {
       body: JSON.stringify(body),
     }
   );
+  console.log(res);
 
   return await res.text();
 }

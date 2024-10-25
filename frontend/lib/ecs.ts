@@ -1,7 +1,7 @@
 import { CreateServiceCommand, ECSClient } from "@aws-sdk/client-ecs";
 
 const ecsClient = new ECSClient({
-  region: "us-east-1",
+  region: "",
   credentials: {
     accessKeyId: "",
     secretAccessKey: "",

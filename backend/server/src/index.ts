@@ -27,7 +27,6 @@ import {
 } from "./ratelimit";
 
 const app: Express = express();
-
 const port = process.env.PORT || 4000;
 
 const httpServer = createServer(app);
@@ -61,24 +60,17 @@ const handshakeSchema = z.object({
 io.use(async (socket, next) => {
   const q = socket.handshake.query;
 
-  console.log("middleware");
-  console.log(q);
-
   const parseQuery = handshakeSchema.safeParse(q);
-
   if (!parseQuery.success) {
-    console.log("issue here");
     next(new Error("Invalid request"));
     return;
   }
 
   const { virtualboxId, userId } = parseQuery.data;
-  console.log("virtualboxId: ", virtualboxId);
   const dbUser = await fetch(
     `https://database.pkunofficial66.workers.dev/api/user?id=${userId}`
   );
   const dbUserJSON = await dbUser.json();
-  console.log(dbUserJSON);
 
   if (!dbUserJSON) {
     next(new Error("DB error"));
@@ -92,7 +84,6 @@ io.use(async (socket, next) => {
   const sharedVirtualboxes = dbUserJSON.usersToVirtualboxes.find(
     (utv: any) => utv.virtualboxId === virtualboxId
   );
-  console.log(virtualbox);
   if (!virtualbox && !sharedVirtualboxes) {
     next(new Error("Invalid credentials"));
     return;
@@ -108,8 +99,6 @@ io.use(async (socket, next) => {
 });
 
 io.on("connection", async (socket) => {
-  console.log("connected");
-
   if (inactivityTimeout) clearTimeout(inactivityTimeout);
   const data = socket.data as {
     userId: string;
@@ -120,22 +109,15 @@ io.on("connection", async (socket) => {
   if (data.isOwner) {
     isOwnerConnected = true;
   } else if (!isOwnerConnected) {
-    console.log("the virtual box owner not connected");
     socket.emit("disableAccess", "The virtualbox owner is not connected.");
     return;
   }
 
-  console.log("describing services");
-  console.log("here1")
-  const describeService = await testDescribe();
-  console.log("here2")
-  console.log(describeService);
-  console.log(data);
   const virtualboxFiles = await getVirtualboxFiles(data.id);
   virtualboxFiles.fileData.forEach((file) => {
     const filePath = path.join(dirName, file.id);
     fs.mkdirSync(path.dirname(filePath), { recursive: true });
-    fs.writeFile(filePath, file.data, function (err) {
+    fs.writeFile(filePath, file.data, (err) => {
       if (err) throw err;
     });
   });
@@ -166,7 +148,7 @@ io.on("connection", async (socket) => {
 
       file.data = body;
 
-      fs.writeFile(path.join(dirName, file.id), body, function (err) {
+      fs.writeFile(path.join(dirName, file.id), body, (err) => {
         if (err) throw err;
       });
 
@@ -185,11 +167,12 @@ io.on("connection", async (socket) => {
           "Rate Limited: project size exceeded. Please delete some files."
         );
         callback({ success: false });
+        return;
       }
       await createFileRL.consume(data.userId, 1);
       const id = `projects/${data.id}/${name}`;
 
-      fs.writeFile(path.join(dirName, id), "", function (err) {
+      fs.writeFile(path.join(dirName, id), "", (err) => {
         if (err) throw err;
       });
 
@@ -213,7 +196,6 @@ io.on("connection", async (socket) => {
 
   socket.on("moveFile", async (fileId: string, folderId: string, callback) => {
     const file = virtualboxFiles.fileData.find((f) => f.id === fileId);
-
     if (!file) return;
 
     const parts = fileId.split("/");
@@ -222,7 +204,7 @@ io.on("connection", async (socket) => {
     fs.rename(
       path.join(dirName, fileId),
       path.join(dirName, newFileId),
-      function (err) {
+      (err) => {
         if (err) throw err;
       }
     );
@@ -245,7 +227,7 @@ io.on("connection", async (socket) => {
 
     await Promise.all(
       files.map(async (file) => {
-        fs.unlink(path.join(dirName, file), function (err) {
+        fs.unlink(path.join(dirName, file), (err) => {
           if (err) throw err;
         });
 
@@ -258,11 +240,8 @@ io.on("connection", async (socket) => {
     );
 
     const newFiles = await getVirtualboxFiles(data.id);
-
     callback(newFiles.files);
   });
-
-  socket.on("renameFolder", async (folderId: string, callback) => {});
 
   socket.on("createFolder", async (name: string, callback) => {
     try {
@@ -270,7 +249,7 @@ io.on("connection", async (socket) => {
 
       const id = `projects/${data.id}/${name}`;
 
-      fs.mkdir(path.join(dirName, id), { recursive: true }, function (err) {
+      fs.mkdir(path.join(dirName, id), { recursive: true }, (err) => {
         if (err) throw err;
       });
 
@@ -286,7 +265,7 @@ io.on("connection", async (socket) => {
       const file = virtualboxFiles.fileData.find((f) => f.id === fileId);
       if (!file) return;
 
-      fs.unlink(path.join(dirName, fileId), function (err) {
+      fs.unlink(path.join(dirName, fileId), (err) => {
         if (err) throw err;
       });
 
@@ -309,37 +288,12 @@ io.on("connection", async (socket) => {
     });
   });
 
-  socket.on("renameFile", async (fileId: string, newName: string) => {
-    try {
-      await renameFileRL.consume(data.userId, 1);
-      const file = virtualboxFiles.fileData.find((f) => f.id === fileId);
-
-      if (!file) return;
-
-      file.id = newName;
-      const parts = fileId.split("/");
-      const newFileId =
-        parts.slice(0, parts.length - 1).join("/") + "/" + newName;
-
-      fs.rename(
-        path.join(dirName, fileId),
-        path.join(dirName, newFileId),
-        function (err) {
-          if (err) throw err;
-        }
-      );
-      await renameFile(fileId, newFileId, file.data);
-    } catch (e) {
-      io.emit("rateLimit", "Rate limited: file saving. Please slow down.");
-    }
-  });
-
   socket.on("createTerminal", (id: string, callback) => {
     if (terminals[id] || Object.keys(terminals).length >= 4) {
       return;
     }
+    console.log("here")
 
-    console.log("creating terminal (" + id + ")");
     const pty = spawn(os.platform() === "win32" ? "cmd.exe" : "bash", [], {
       name: "xterm",
       cols: 100,
@@ -354,120 +308,36 @@ io.on("connection", async (socket) => {
     });
 
     const onExit = pty.onExit((code) => console.log("exit:(", code));
-    pty.write("clear\r");
-    terminals[id] = {
-      terminal: pty,
-      onData,
-      onExit,
-    };
+    pty.write("echo Hello World\n");
 
+    terminals[id] = { terminal: pty, onData, onExit };
     callback();
   });
 
-  socket.on("closeTerminal", (id: string, callback) => {
-    if (!terminals[id]) {
-      console.log(
-        "tried to close, but term does not exists. terminals",
-        terminals
-      );
-      return;
-    }
-
-    terminals[id].onData.dispose();
-    terminals[id].onExit.dispose();
-
-    delete terminals[id];
-
-    callback();
-  });
-
-  socket.on("terminalData", (id: string, data: string) => {
-    console.log(`Received data for terminal ${id}: ${data}`);
-    if (!terminals[id]) {
-      return;
-    }
-
-    try {
-      terminals[id].terminal.write(data);
-    } catch (e) {
-      console.log("Error writing to terminal", e);
+  socket.on("terminalData", (id: string, input: string) => {
+    if (terminals[id]) {
+      terminals[id].terminal.write(input);
     }
   });
 
-  socket.on(
-    "generateCode",
-    async (
-      fileName: string,
-      code: string,
-      line: number,
-      instructions: string,
-      callback
-    ) => {
-      const fetchPromise = fetch(
-        `https://database.pkunofficial66.workers.dev/api/virtualbox/generate`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            userId: data.userId,
-          }),
-        }
-      );
-
-      const generateCodePromise = generateCode({
-        fileName,
-        code,
-        line,
-        instructions,
+  socket.on("disconnect", () => {
+    if (inactivityTimeout) clearTimeout(inactivityTimeout);
+    inactivityTimeout = setTimeout(() => {
+      isOwnerConnected = false;
+      Object.keys(terminals).forEach((key) => {
+        terminals[key].terminal.kill();
+        terminals[key].onData.dispose();
+        terminals[key].onExit.dispose();
+        delete terminals[key];
       });
-
-      const [fetchResponse, generateCodeResponse] = await Promise.all([
-        fetchPromise,
-        generateCodePromise,
-      ]);
-      const json = await generateCodeResponse.json();
-      callback(json);
-    }
-  );
-
-  socket.on("disconnect", async () => {
-    if (data.isOwner) {
-      Object.entries(terminals).forEach((t) => {
-        const { terminal, onData, onExit } = t[1];
-        if (os.platform() !== "win32") terminal.kill();
-        onData.dispose();
-        onExit.dispose();
-        delete terminals[t[0]];
-      });
-
-      console.log("The owner disconnected");
-      socket.broadcast.emit("ownerDisconnected");
-    } else {
-      console.log("A shared user disconnected.");
-      socket.broadcast.emit(
-        "disableAccess",
-        "The virtualbox owner has disconnected."
-      );
-    }
-
-    const sockets = await io.fetchSockets();
-    if (inactivityTimeout) {
-      clearTimeout(inactivityTimeout);
-    }
-    if (sockets.length === 0) {
-      inactivityTimeout = setTimeout(() => {
-        io.fetchSockets().then((sockets) => {
-          if (sockets.length === 0) {
-            console.log("No users have been connected for 15 seconds");
-          }
-        });
-      }, 15000);
-    }
+    }, 10000);
   });
 });
 
+httpServer.on("request",(req,res)=>{
+  console.log("request")
+})
+
 httpServer.listen(port, () => {
-  console.log(`Server running on port ${port}`);
+  console.log(`Server is running on port ${port}`);
 });

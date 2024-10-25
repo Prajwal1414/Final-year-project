@@ -8,7 +8,7 @@ import { R2Files } from "./types";
 import { error } from "console";
 
 const client = new ECSClient({
-  region: "us-east-1",
+  region: "",
   credentials: {
     accessKeyId: "",
     secretAccessKey: "",
@@ -46,13 +46,16 @@ export const renameFile = async (
   newFileId: string,
   data: string
 ) => {
-  const res = await fetch(`https://storage.pkunofficial66.workers.dev/api/rename`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ fileId, newFileId, data }),
-  });
+  const res = await fetch(
+    `https://storage.pkunofficial66.workers.dev/api/rename`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ fileId, newFileId, data }),
+    }
+  );
 
   console.log(res);
 
@@ -60,13 +63,16 @@ export const renameFile = async (
 };
 
 export const saveFile = async (fileId: string, data: string) => {
-  const res = await fetch(`https://storage.pkunofficial66.workers.dev/api/save`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ fileId, data }),
-  });
+  const res = await fetch(
+    `https://storage.pkunofficial66.workers.dev/api/save`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ fileId, data }),
+    }
+  );
 
   return res.ok;
 };

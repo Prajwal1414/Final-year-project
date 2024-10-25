@@ -8,7 +8,7 @@ import { R2Files } from "./types";
 import { error } from "console";
 
 const client = new ECSClient({
-  region: "",
+  region: "ap-south-1",
   credentials: {
     accessKeyId: "",
     secretAccessKey: "",
@@ -47,7 +47,7 @@ export const renameFile = async (
   data: string
 ) => {
   const res = await fetch(
-    `https://storage.pkunofficial66.workers.dev/api/rename`,
+    `https://storage.${process.env.CLOUDFLARE_ID}.workers.dev/api/rename`,
     {
       method: "POST",
       headers: {
@@ -64,7 +64,7 @@ export const renameFile = async (
 
 export const saveFile = async (fileId: string, data: string) => {
   const res = await fetch(
-    `https://storage.pkunofficial66.workers.dev/api/save`,
+    `https://storage.${process.env.CLOUDFLARE_ID}.workers.dev/api/save`,
     {
       method: "POST",
       headers: {
@@ -72,13 +72,14 @@ export const saveFile = async (fileId: string, data: string) => {
       },
       body: JSON.stringify({ fileId, data }),
     }
+    
   );
 
   return res.ok;
 };
 
 export const createFile = async (fileId: string) => {
-  const res = await fetch(`https://storage.pkunofficial66.workers.dev/api`, {
+  const res = await fetch(`https://storage.${process.env.CLOUDFLARE_ID}.workers.dev/api`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -90,7 +91,7 @@ export const createFile = async (fileId: string) => {
 };
 
 export const deleteFile = async (fileId: string) => {
-  const res = await fetch(`https://storage.pkunofficial66.workers.dev/api`, {
+  const res = await fetch(`https://storage.${process.env.CLOUDFLARE_ID}.workers.dev/api`, {
     method: "DELETE",
     headers: {
       "Content-Type": "application/json",
@@ -149,7 +150,7 @@ export const generateCode = async ({
 
 export const getProjectSize = async (id: string) => {
   const res = await fetch(
-    `https://storage.pkunofficial66.workers.dev/api/size?virtualboxId=${id}`
+    `https://storage.${process.env.CLOUDFLARE_ID}.workers.dev/api/size?virtualboxId=${id}`
   );
 
   return (await res.json()).size;
@@ -157,7 +158,7 @@ export const getProjectSize = async (id: string) => {
 
 export const getFolder = async (folderId: string) => {
   const res = await fetch(
-    `https://storage.pkunofficial66.workers.dev/api?folderId=${folderId}`
+    `https://storage.${process.env.CLOUDFLARE_ID}.workers.dev/api?folderId=${folderId}`
   );
 
   const data: R2Files = await res.json();

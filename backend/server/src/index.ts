@@ -25,10 +25,10 @@ import {
   renameFileRL,
   saveFileRL,
 } from "./ratelimit";
-
+import { config } from "dotenv";
 const app: Express = express();
 const port = process.env.PORT || 4000;
-
+config();
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
   cors: {
@@ -68,7 +68,7 @@ io.use(async (socket, next) => {
 
   const { virtualboxId, userId } = parseQuery.data;
   const dbUser = await fetch(
-    `https://database.pkunofficial66.workers.dev/api/user?id=${userId}`
+    `https://database.${process.env.CLOUDFLARE_ID}.workers.dev/api/user?id=${userId}`
   );
   const dbUserJSON = await dbUser.json();
 
@@ -292,7 +292,7 @@ io.on("connection", async (socket) => {
     if (terminals[id] || Object.keys(terminals).length >= 4) {
       return;
     }
-    console.log("here")
+    console.log("here");
 
     const pty = spawn(os.platform() === "win32" ? "cmd.exe" : "bash", [], {
       name: "xterm",
@@ -334,9 +334,9 @@ io.on("connection", async (socket) => {
   });
 });
 
-httpServer.on("request",(req,res)=>{
-  console.log("request")
-})
+httpServer.on("request", (req, res) => {
+  console.log("request");
+});
 
 httpServer.listen(port, () => {
   console.log(`Server is running on port ${port}`);

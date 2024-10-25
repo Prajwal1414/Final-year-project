@@ -13,13 +13,13 @@ export default async function AppAuthLayout({
   }
 
   const dbUser = await fetch(
-    `https://database.pkunofficial66.workers.dev/api/user?id=${user.id}`
+    `https://database.${process.env.CLOUDFLARE_ID}.workers.dev/api/user?id=${user.id}`
   );
 
   const dbUserJSON = await dbUser.json();
 
   if (!dbUserJSON.id) {
-    const res = await fetch("https://database.pkunofficial66.workers.dev/api/user", {
+    const res = await fetch(`https://database.${process.env.CLOUDFLARE_ID}.workers.dev/api/user`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
   }
 
   const res = await fetch(
-    `https://database.pkunofficial66.workers.dev/api/user?id=${clerkUser.id}`
+    `https://database.${process.env.CLOUDFLARE_ID}.workers.dev/api/user?id=${clerkUser.id}`
   );
   const user = (await res.json()) as User;
 

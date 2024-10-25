@@ -2,7 +2,7 @@ import { R2FileData, R2Files, TFile, TFileData, TFolder } from "./types";
 
 const getVirtualboxFiles = async (id: string) => {
   const virtualboxRes = await fetch(
-    `https://storage.pkunofficial66.workers.dev/api?virtualboxId=${id}`
+    `https://storage.${process.env.CLOUDFLARE_ID}.workers.dev/api?virtualboxId=${id}`
   );
   const virtualboxData: R2Files = await virtualboxRes.json();
 
@@ -66,7 +66,7 @@ const processFiles = async (paths: string[], id: string) => {
 const fetchFileContent = async (fileId: string): Promise<string> => {
   try {
     const fileRes = await fetch(
-      `https://storage.pkunofficial66.workers.dev/api?fileId=${fileId}`
+      `https://storage.${process.env.CLOUDFLARE_ID}.workers.dev/api?fileId=${fileId}`
     );
     return await fileRes.text();
   } catch (error) {

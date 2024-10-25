@@ -15,7 +15,7 @@ export async function createVirtualbox(body: {
 }) {
   console.log(body);
   const res = await fetch(
-    "https://database.pkunofficial66.workers.dev/api/virtualbox",
+    `https://database.${process.env.CLOUDFLARE_ID}.workers.dev/api/virtualbox`,
     {
       method: "PUT",
       headers: {
@@ -31,7 +31,7 @@ export async function createVirtualbox(body: {
 
 export async function deleteVirtualbox(id: string) {
   const res = await fetch(
-    `https://database.pkunofficial66.workers.dev/api/virtualbox?id=${id}`,
+    `https://database.${process.env.CLOUDFLARE_ID}.workers.dev/api/virtualbox?id=${id}`,
     {
       method: "DELETE",
     }
@@ -46,7 +46,7 @@ export async function updateVirtualbox(body: {
   visibility?: "public" | "private";
 }) {
   const res = await fetch(
-    "https://database.pkunofficial66.workers.dev/api/virtualbox",
+    `https://database.${process.env.CLOUDFLARE_ID}.workers.dev/api/virtualbox`,
     {
       method: "POST",
       headers: {
@@ -62,7 +62,7 @@ export async function updateVirtualbox(body: {
 export async function shareVirtualbox(virtualboxId: string, email: string) {
   try {
     const res = await fetch(
-      "https://database.pkunofficial66.workers.dev/api/virtualbox/share",
+      `https://database.${process.env.CLOUDFLARE_ID}.workers.dev/api/virtualbox/share`,
       {
         method: "POST",
         headers: {
@@ -86,7 +86,7 @@ export async function shareVirtualbox(virtualboxId: string, email: string) {
 
 export async function unshareVirtualbox(virtualboxId: string, userId: string) {
   const res = await fetch(
-    "https://database.pkunofficial66.workers.dev/api/virtualbox/share",
+    `https://database.${process.env.CLOUDFLARE_ID}.workers.dev/api/virtualbox/share`,
     {
       method: "DELETE",
       headers: {

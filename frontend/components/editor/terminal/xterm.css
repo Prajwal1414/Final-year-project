@@ -35,6 +35,12 @@
  *  Default styles for xterm.js
  */
 
+ @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400&display=swap');
+
+ :root {
+  --font-terminal: 'Fira Code', monospace;
+}
+
 .xterm {
   cursor: text;
   position: relative;

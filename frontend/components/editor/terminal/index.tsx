@@ -33,7 +33,7 @@ export default function EditorTerminal({
         background: "#262626",
       },
       fontSize: 14,
-      fontFamily: "var(--font-geist-mono)",
+      fontFamily: "var(--font-terminal)",
       lineHeight: 1.5,
       letterSpacing: 0,
     });

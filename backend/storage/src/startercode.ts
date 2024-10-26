@@ -123,7 +123,7 @@ function App() {
         Edit App.jsx to get started.
       </p>
       <button onClick={() => setCount(count => count + 1)}>
-        Clicked {count} times
+        Clicked {count} time(s)
       </button>
     </div>
   )

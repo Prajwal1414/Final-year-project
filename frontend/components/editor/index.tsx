@@ -535,8 +535,8 @@ export default function CodeEditor({
             tab.id === activeId ? { ...tab, saved: true } : tab
           )
         );
-
         socket.emit("saveFile", activeId, editorRef?.getValue());
+       console.log("emitted")
       }
     };
 

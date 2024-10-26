@@ -32,7 +32,10 @@ config();
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
   cors: {
-    origin: "*",
+    origin: "http://localhost:3000", 
+    methods: ["GET", "POST"],
+    allowedHeaders: ["Content-Type"],
+    credentials: true,
   },
 });
 
@@ -131,7 +134,13 @@ io.on("connection", async (socket) => {
     callback(file.data);
   });
 
+  socket.onAny((event, ...args) => {
+    console.log("event log", event);
+    console.log("args log", args);
+  });
+
   socket.on("saveFile", async (fileId: string, body: string) => {
+    console.log("received emitted files", body);
     try {
       await saveFileRL.consume(data.userId, 1);
 
@@ -334,9 +343,6 @@ io.on("connection", async (socket) => {
   });
 });
 
-httpServer.on("request", (req, res) => {
-  console.log("request");
-});
 
 httpServer.listen(port, () => {
   console.log(`Server is running on port ${port}`);

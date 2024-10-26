@@ -59,7 +59,7 @@ export default {
 					await db.delete(schema.usersToVirtualboxes).where(eq(schema.usersToVirtualboxes.virtualboxId, id));
 					await db.delete(schema.virtualbox).where(eq(schema.virtualbox.id, id));
 
-					const deleteStorageRequest = new Request(`https://storage.${process.env.CLOUDFLARE_ID}.workers.dev/api/project`, {
+					const deleteStorageRequest = new Request(`https://storage.iamprajwal18.workers.dev/api/project`, {
 						method: 'DELETE',
 						body: JSON.stringify({ virtualboxId: id }),
 						headers: { 'Content-Type': 'application/json' },
@@ -95,7 +95,7 @@ export default {
 
 				const vb = await db.insert(schema.virtualbox).values({ type, name, userId, visibility }).returning().get();
 
-				const initStorageRequest = new Request(`https://storage.${process.env.CLOUDFLARE_ID}.workers.dev/api/init`, {
+				const initStorageRequest = new Request(`https://storage.iamprajwal18.workers.dev/api/init`, {
 					method: 'POST',
 					body: JSON.stringify({ virtualboxId: vb.id, type }),
 					headers: {

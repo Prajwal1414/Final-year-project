@@ -9,5 +9,5 @@ services = [{ binding = "STORAGE", service = "storage" }]
 [[d1_databases]]
 binding = "DB"
 database_name = "d1-virtualbox"
-database_id = "d0ce18e5-243e-4c53-9164-4613bfb66b43"
+database_id = "0e8ed035-3c1f-4a6c-bdcf-33b7e657f814"
 

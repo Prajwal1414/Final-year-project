@@ -9,7 +9,7 @@
     "start": "tsc -b && node dist/index.js",
     "dev": "nodemon src/index.ts"
   },
-  "author": "kuluruvineeth",
+  "author": "Prajwal",
   "license": "ISC",
   "dependencies": {
     "@aws-sdk/client-ecs": "^3.600.0",

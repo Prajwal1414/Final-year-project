@@ -177,17 +177,17 @@ export default function Sidebar({
       <div className="w-full space-y-4">
         <div className="flex items-center justify-between w-full">
           <div className="flex items-center">
-            <Sparkles
+            {/* <Sparkles
               className={`h-4 w-4 mr-2 ${
                 ai ? "text-indigo-500" : "text-muted-foreground"
               }`}
-            />
-            Copilot
+            /> */}
+            {/* Copilot
             <span className="font-mono text-muted-foreground inline-block ml-1.5 text-xs leading-none border border-b-2 border-muted-foreground py-1 px-1.5 rounded-md">
               ctrl+G
-            </span>
+            </span> */}
           </div>
-          <Switch checked={ai} onCheckedChange={setAi} />
+          {/* <Switch checked={ai} onCheckedChange={setAi} /> */}
         </div>
         <Button className="w-full">
           <MonitorPlay className="w-4 h-4 mr-2" /> Run

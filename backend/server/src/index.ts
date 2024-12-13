@@ -304,6 +304,7 @@ io.on("connection", async (socket) => {
     console.log("here");
 
     const pty = spawn(os.platform() === "win32" ? "cmd.exe" : "bash", [], {
+    // const pty = spawn(os.platform() === "win32" ? "bash" : "cmd.exe", [], {
       name: "xterm",
       cols: 100,
       cwd: path.join(dirName, "projects", data.id),

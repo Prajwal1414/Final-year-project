@@ -172,6 +172,7 @@
       socket.on("rateLimit", onRateLimit);
       socket.on("terminalResponse", onTerminalResponse);
       socket.on("disableAccess", onDisableAccess);
+
       return () => {
         socket.off("loaded", onLoadedEvent);
         socket.off("disconnect", onDisconnect);
@@ -189,30 +190,113 @@
       });
     };
 
+    // const selectFile = (tab: TTab) => {
+    //   if (tab.id === activeId) return;
+    //   const exists = tabs.find((t) => t.id === tab.id);
+    //   setTabs((prev) => {
+    //     if (exists) {
+    //       setActiveId(exists.id);
+    //       return prev;
+    //     }
+    //     return [...prev, tab];
+    //   });
+
+    //   socket.emit("getFile", tab.id, (response: string) => {
+    //     setActiveFile(response);
+    //   });
+    //   setEditorLanguage(processFileType(tab.name));
+    //   setActiveId(tab.id);
+    // };
+
+    //Claude
+    // const selectFile = (tab: TTab) => {
+    //   if (tab.id === activeId) return;
+      
+    //   const exists = tabs.find((t) => t.id === tab.id);
+      
+    //   // Get file content first
+    //   socket.emit("getFile", tab.id, (response: string) => {
+    //     // Only proceed if we got content
+    //     if (response !== undefined) {
+    //       setActiveFile(response);
+    //       setEditorLanguage(processFileType(tab.name));
+          
+    //       // Update tabs and active ID only after we have the content
+    //       setTabs((prev) => {
+    //         if (exists) {
+    //           return prev;
+    //         }
+    //         return [...prev, tab];
+    //       });
+          
+    //       // Set active ID last, after we have everything ready
+    //       setActiveId(tab.id);
+    //     }
+    //   });
+    // };
+
+    //Phind
     const selectFile = (tab: TTab) => {
       if (tab.id === activeId) return;
+      
       const exists = tabs.find((t) => t.id === tab.id);
-      setTabs((prev) => {
-        if (exists) {
-          setActiveId(exists.id);
-          return prev;
+      
+      // Get file content first
+      socket.emit("getFile", tab.id, (response: string | undefined) => {
+        if (response !== undefined) {
+          setActiveFile(response);
+          setEditorLanguage(processFileType(tab.name));
+          
+          // Update tabs and active ID only after we have the content
+          setTabs((prev) => {
+            if (exists) {
+              return prev;
+            }
+            return [...prev, tab];
+          });
+          
+          // Set active ID last, after we have everything ready
+          setActiveId(tab.id);
         }
-        return [...prev, tab];
       });
-
-      socket.emit("getFile", tab.id, (response: string) => {
-        setActiveFile(response);
-      });
-      setEditorLanguage(processFileType(tab.name));
-      setActiveId(tab.id);
     };
+    
 
+    // const closeTab = (id: string) => {
+    //   const numTabs = tabs.length;
+    //   const index = tabs.findIndex((t) => t.id === id);
+
+    //   if (index === -1) return;
+
+    //   const nextId =
+    //     activeId === id
+    //       ? numTabs === 1
+    //         ? null
+    //         : index < numTabs - 1
+    //         ? tabs[index + 1].id
+    //         : tabs[index - 1].id
+    //       : activeId;
+
+    //   setTabs((prev) => prev.filter((t) => t.id !== id));
+
+    //   if (!nextId) {
+    //     setActiveId("");
+    //     //Claude
+    //     setActiveFile(null);
+    //   } else {
+    //     const nextTab = tabs.find((t) => t.id === nextId);
+
+    //     if (nextTab) selectFile(nextTab);
+    //   }
+    // };
+
+    //Phind
     const closeTab = (id: string) => {
       const numTabs = tabs.length;
       const index = tabs.findIndex((t) => t.id === id);
-
+    
       if (index === -1) return;
-
+    
       const nextId =
         activeId === id
           ? numTabs === 1
@@ -221,17 +305,18 @@
             ? tabs[index + 1].id
             : tabs[index - 1].id
           : activeId;
-
+    
       setTabs((prev) => prev.filter((t) => t.id !== id));
-
+    
       if (!nextId) {
         setActiveId("");
+        setActiveFile(null);
       } else {
         const nextTab = tabs.find((t) => t.id === nextId);
-
         if (nextTab) selectFile(nextTab);
       }
     };
+    
 
     const clerk = useClerk();
 
@@ -352,50 +437,90 @@
 
     const room = useRoom();
 
+    // useEffect(() => {
+    //   const tab = tabs.find((t) => t.id === activeId);
+    //   const model = editorRef?.getModel();
+
+    //   if (!editorRef || !tab || !model) return;
+
+    //   const yDoc = new Y.Doc();
+    //   const yText = yDoc.getText(tab.id);
+    //   const yProvider: any = new LiveblocksProvider(room, yDoc);
+
+    //   const onSync = (isSynced: boolean) => {
+    //     if (isSynced) {
+    //       const text = yText.toString();
+    //       if (text === "") {
+    //         if (activeFile) {
+    //           yText.insert(0, activeFile);
+    //         } else {
+    //           setTimeout(() => {
+    //             yText.insert(0, editorRef.getValue());
+    //           }, 0);
+    //         }
+    //       }
+    //     } else {
+    //     }
+    //   };
+
+    //   yProvider.on("sync", onSync);
+
+    //   setProvider(yProvider);
+
+    //   const binding = new MonacoBinding(
+    //     yText,
+    //     model,
+    //     new Set([editorRef]),
+    //     yProvider.awareness as Awareness
+    //   );
+
+    //   return () => {
+    //     yDoc?.destroy();
+    //     yProvider?.destroy();
+    //     binding?.destroy();
+    //     yProvider.off("sync", onSync);
+    //   };
+    // }, [editorRef, room, activeFile]);
+
+    //Claude
     useEffect(() => {
       const tab = tabs.find((t) => t.id === activeId);
       const model = editorRef?.getModel();
-
-      if (!editorRef || !tab || !model) return;
-
+  
+      if (!editorRef || !tab || !model || !activeFile) return;
+  
       const yDoc = new Y.Doc();
       const yText = yDoc.getText(tab.id);
       const yProvider: any = new LiveblocksProvider(room, yDoc);
-
+  
       const onSync = (isSynced: boolean) => {
         if (isSynced) {
           const text = yText.toString();
           if (text === "") {
             if (activeFile) {
               yText.insert(0, activeFile);
-            } else {
-              setTimeout(() => {
-                yText.insert(0, editorRef.getValue());
-              }, 0);
             }
           }
-        } else {
         }
       };
-
+  
       yProvider.on("sync", onSync);
-
       setProvider(yProvider);
-
+  
       const binding = new MonacoBinding(
         yText,
         model,
         new Set([editorRef]),
         yProvider.awareness as Awareness
       );
-
+  
       return () => {
         yDoc?.destroy();
         yProvider?.destroy();
         binding?.destroy();
         yProvider.off("sync", onSync);
       };
-    }, [editorRef, room, activeFile]);
+    }, [editorRef, room, activeFile, activeId]);
 
     useEffect(() => {
       if (!ai) {
